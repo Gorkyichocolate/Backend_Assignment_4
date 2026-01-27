@@ -11,54 +11,39 @@
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>Analytical Platform</h1>
-            <p>Real-time measurement insights and metrics</p>
-        </header>
-
-        <section class="controls">
-            <div class="control-group">
-                <label for="fieldSelect">Select Field</label>
-                <select id="fieldSelect">
-                    <option value="field1">Field 1</option>
-                    <option value="field2">Field 2</option>
-                    <option value="field3">Field 3</option>
-                </select>
+    <div class="main-wrapper">
+        <div class="control-block">
+            <div class="controls-row">
+                <div class="control-item">
+                    <label for="fieldSelect">Select Field</label>
+                    <select id="fieldSelect">
+                        <option value="field1">Field 1</option>
+                        <option value="field2">Field 2</option>
+                        <option value="field3">Field 3</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="control-item">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="control-item">
+                    <label for="cityInput">City</label>
+                    <input type="text" id="cityInput" placeholder="Enter city">
+                </div>
             </div>
-            <div class="control-group">
-                <label for="startDate">Start Date</label>
-                <input type="date" id="startDate">
-            </div>
-            <div class="control-group">
-                <label for="endDate">End Date</label>
-                <input type="date" id="endDate">
-            </div>
-            <button id="updateBtn">Update Dashboard</button>
-        </section>
-
-        <section class="weather-controls card">
-            <h3>Record Current Weather</h3>
-            <div class="control-row">
-                <input type="text" id="cityInput" placeholder="Enter city (e.g. Almaty)">
-                <button id="weatherBtn" class="accent-btn">Record Weather</button>
+            <div class="controls-buttons">
+                <button id="updateBtn" class="btn-primary">Update Dashboard</button>
+                <button id="weatherBtn" class="btn-primary">Record Weather</button>
             </div>
             <p id="weatherStatus" class="status-msg"></p>
-        </section>
+        </div>
 
-        <main class="dashboard">
-            <div class="chart-container card">
-                <h3>Measurement Trend</h3>
-                <canvas id="lineChart"></canvas>
-            </div>
-            <div class="chart-container card">
-                <h3>Distribution Analysis</h3>
-                <canvas id="barChart"></canvas>
-            </div>
-        </main>
-
-        <section class="metrics card">
-            <h3>Field Metrics</h3>
+        <section class="metrics-section">
+            <h2>Field Metrics</h2>
             <div class="metrics-grid" id="metricsDisplay">
                 <div class="metric-item">
                     <span class="label">Average</span>
@@ -78,6 +63,17 @@
                 </div>
             </div>
         </section>
+
+        <main class="dashboard">
+            <div class="chart-container">
+                <h3>Measurement Trend</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Distribution Analysis</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+        </main>
 
         <div id="errorMessage" class="error-toast"></div>
     </div>
