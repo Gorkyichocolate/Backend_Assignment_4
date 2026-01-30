@@ -6,6 +6,11 @@ const measurementSchema = new mongoose.Schema({
         required: true,
         index: true
     },
+    city: {
+        type: String,
+        index: true,
+        default: null
+    },
     field1: {
         type: Number,
         required: true

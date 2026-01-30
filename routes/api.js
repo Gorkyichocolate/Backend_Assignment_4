@@ -84,6 +84,9 @@ const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 router.post('/measurements/weather', async (req, res) => {
     try {
         const { city, start_date, end_date } = req.body;
+        if (!WEATHER_API_KEY) {
+            return res.status(500).json({ error: 'WEATHER_API_KEY is not configured' });
+        }
         if (!city) {
             return res.status(400).json({ error: 'City name is required' });
         }
@@ -113,8 +116,21 @@ router.post('/measurements/weather', async (req, res) => {
         const measurements = [];
 
         for (const date of dates) {
-            const url = `http://api.weatherapi.com/v1/history.json?key=${WEATHER_API_KEY}&q=${city}&dt=${date}`;
-            const response = await axios.get(url);
+            const url = `https://api.weatherapi.com/v1/history.json?key=${WEATHER_API_KEY}&q=${city}&dt=${date}`;
+            let response;
+            try {
+                response = await axios.get(url, { timeout: 10000 });
+            } catch (apiErr) {
+                const apiCode = apiErr?.code;
+                if (apiCode === 'ETIMEDOUT' || apiCode === 'ECONNABORTED') {
+                    throw new Error(`Weather API timeout for ${date}`);
+                }
+                const apiMessage = apiErr?.response?.data?.error?.message;
+                if (apiMessage) {
+                    throw new Error(`Weather API error for ${date}: ${apiMessage}`);
+                }
+                throw apiErr;
+            }
             const history = response.data?.forecast?.forecastday?.[0];
 
             if (!history || !history.hour || history.hour.length === 0) {
@@ -122,11 +138,20 @@ router.post('/measurements/weather', async (req, res) => {
             }
 
             const hourData = history.hour[12] || history.hour[0];
+            const temp = Number(hourData.temp_c);
+            const humidity = Number(hourData.humidity);
+            const pressure = Number(hourData.pressure_mb);
+
+            if (!Number.isFinite(temp) || !Number.isFinite(humidity) || !Number.isFinite(pressure)) {
+                continue;
+            }
+
             measurements.push({
                 timestamp: new Date(hourData.time_epoch * 1000),
-                field1: hourData.temp_c,
-                field2: hourData.humidity,
-                field3: hourData.pressure_mb
+                city,
+                field1: temp,
+                field2: humidity,
+                field3: pressure
             });
         }
 
@@ -134,7 +159,7 @@ router.post('/measurements/weather', async (req, res) => {
             return res.status(404).json({ error: 'No historical data returned' });
         }
 
-        await Measurement.insertMany(measurements);
+        await Measurement.insertMany(measurements, { ordered: false });
 
         res.json({
             message: 'Weather history recorded successfully',
@@ -144,7 +169,15 @@ router.post('/measurements/weather', async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch or save weather data', details: err.message });
+        console.error('Weather save error:', err);
+        const message = err?.message || 'Unknown error';
+        if (message.startsWith('Weather API timeout')) {
+            return res.status(504).json({ error: 'Weather API timeout', details: message });
+        }
+        if (message.startsWith('Weather API error')) {
+            return res.status(502).json({ error: 'Weather API error', details: message });
+        }
+        res.status(500).json({ error: 'Failed to fetch or save weather data', details: message });
     }
 });
 

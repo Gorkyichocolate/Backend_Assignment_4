@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/analytics_db';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function seedData() {
     try {
@@ -24,6 +24,7 @@ async function seedData() {
 
             measurements.push({
                 timestamp: date,
+                city: 'Seed',
                 field1: Math.floor(Math.random() * 100) + 50,
                 field2: Math.floor(Math.random() * 200) + 100,
                 field3: Math.floor(Math.random() * 50) + 10

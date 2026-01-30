@@ -12,7 +12,6 @@ function toDateInputValue(date) {
     return new Date(date.getTime() - tzOffsetMs).toISOString().split('T')[0];
 }
 
-// Set default date range (last 30 days) using local date
 const today = new Date();
 const past30 = new Date();
 past30.setDate(today.getDate() - 30);
@@ -193,16 +192,17 @@ weatherBtn.addEventListener('click', async () => {
         });
         const result = await res.json();
 
-        if (!res.ok) throw new Error(result.error);
+        if (!res.ok) throw new Error(result.details || result.error);
 
-        weatherStatus.textContent = `Success: Recorded ${result.data.temp}°C for ${result.data.city}`;
+        const days = result?.data?.days ?? 0;
+        const cityName = result?.data?.city ?? city;
+        weatherStatus.textContent = `Success: Recorded ${days} day(s) for ${cityName}`;
         cityInput.value = '';
-        fetchData(); // Refresh dashboard
+        fetchData();
     } catch (err) {
         weatherStatus.textContent = '';
         showError(err.message);
     }
 });
 
-// Load initial data on page load
 fetchData();
